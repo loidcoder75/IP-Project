@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Library System</title>
+    <style>
+        /* CSS Styling */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 250px;
+            background-color: #000000;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar h2 {
+            color: #1db954;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: #b3b3b3;
+            font-size: 16px;
+            text-align: left;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.2s;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            color: #ffffff;
+            background-color: #282828;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: linear-gradient(to bottom, #1e1e1e, #121212);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        /* Forms & Inputs */
+        .form-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input, select {
+            padding: 10px;
+            background-color: #2a2a2a;
+            border: 1px solid #404040;
+            color: white;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        button.action-btn {
+            padding: 10px 20px;
+            background-color: #1db954;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button.action-btn:hover {
+            background-color: #1ed760;
+            transform: scale(1.02);
+        }
+
+        button.delete-btn {
+            background-color: #e74c3c;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Tables & Lists */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #282828;
+        }
+
+        th {
+            color: #b3b3b3;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        tr:hover {
+            background-color: #282828;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .card {
+            background-color: #181818;
+            padding: 15px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            background-color: #282828;
+        }
+
+        .card h3 {
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .card p {
+            color: #b3b3b3;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Sidebar -->
+    <div class="sidebar">
+        <h2>Music Library</h2>
+        <button class="nav-btn active" onclick="showSection('songs')">🎵 All Songs</button>
+        <button class="nav-btn" onclick="showSection('playlists')">📜 Playlists</button>
+        <button class="nav-btn" onclick="showSection('artists-albums')">🎨 Artists & Albums</button>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+
+        <!-- 1. Songs Section (Add, Search, Remove Songs) -->
+        <div id="songs" class="section active">
+            <h1>Songs Library</h1>
+            
+            <!-- Add Song Form -->
+            <h3>Add New Song</h3>
+            <div class="form-group">
+                <input type="text" id="songTitle" placeholder="Song Title" required>
+                <input type="text" id="songArtist" placeholder="Artist Name" required>
+                <input type="text" id="songAlbum" placeholder="Album Name" required>
+                <button class="action-btn" onclick="addSong()">Add Song</button>
+            </div>
+
+            <!-- Search Bar -->
+            <h3>Search Songs</h3>
+            <div class="form-group">
+                <input type="text" id="searchInput" placeholder="Search by title, artist, or album..." onkeyup="renderSongs()">
+            </div>
+
+            <!-- Songs Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Artist</th>
+                        <th>Album</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="songsList">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 2. Playlists Section (Create & Display Playlists) -->
+        <div id="playlists" class="section">
+            <h1>Playlists</h1>
+            
+            <!-- Create Playlist -->
+            <h3>Create New Playlist</h3>
+            <div class="form-group">
+                <input type="text" id="playlistName" placeholder="Playlist Name">
+                <button class="action-btn" onclick="createPlaylist()">Create Playlist</button>
+            </div>
+
+            <!-- Add Song to Playlist -->
+            <h3>Add Song to Playlist</h3>
+            <div class="form-group">
+                <select id="selectPlaylist"></select>
+                <select id="selectSong"></select>
+                <button class="action-btn" onclick="addSongToPlaylist()">Add to Playlist</button>
+            </div>
+
+            <!-- Display Playlists -->
+            <div id="playlistsDisplay"></div>
+        </div>
+
+        <!-- 3. Manage Albums / Artists Section -->
+        <div id="artists-albums" class="section">
+            <h1>Manage Artists & Albums</h1>
+            
+            <h2>Artists</h2>
+            <div class="card-grid" id="artistsList"></div>
+
+            <h2 style="margin-top: 30px;">Albums</h2>
+            <div class="card-grid" id="albumsList"></div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Implementation -->
+    <script>
+        // Sample Initial Data
+        let songs = JSON.parse(localStorage.getItem('songs')) || [
+            { id: 1, title: "Blinding Lights", artist: "The Weeknd", album: "After Hours" },
+            { id: 2, title: "Shape of You", artist: "Ed Sheeran", album: "Divide" },
+            { id: 3, title: "Levitating", artist: "Dua Lipa", album: "Future Nostalgia" }
+        ];
+
+        let playlists = JSON.parse(localStorage.getItem('playlists')) || [
+            { name: "My Favorites", songIds: [1, 2] }
+        ];
+
+        function saveData() {
+            localStorage.setItem('songs', JSON.stringify(songs));
+            localStorage.setItem('playlists', JSON.stringify(playlists));
+        }
+
+        // Navigation Switcher
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+
+            if (sectionId === 'playlists') updatePlaylistDropdowns();
+            if (sectionId === 'artists-albums') renderArtistsAndAlbums();
+        }
+
+        // --- SONG MANAGEMENT ---
+        function renderSongs() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const songsList = document.getElementById('songsList');
+            songsList.innerHTML = '';
+
+            const filteredSongs = songs.filter(song => 
+                song.title.toLowerCase().includes(searchQuery) ||
+                song.artist.toLowerCase().includes(searchQuery) ||
+                song.album.toLowerCase().includes(searchQuery)
+            );
+
+            filteredSongs.forEach(song => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${song.title}</td>
+                    <td>${song.artist}</td>
+                    <td>${song.album}</td>
+                    <td><button class="delete-btn" onclick="removeSong(${song.id})">Delete</button></td>
+                `;
+                songsList.appendChild(tr);
+            });
+        }
+
+        function addSong() {
+            const title = document.getElementById('songTitle').value.trim();
+            const artist = document.getElementById('songArtist').value.trim();
+            const album = document.getElementById('songAlbum').value.trim();
+
+            if (!title || !artist || !album) {
+                alert("Please fill in all fields!");
+                return;
+            }
+
+            const newSong = { id: Date.now(), title, artist, album };
+            songs.push(newSong);
+            saveData();
+            renderSongs();
+
+            // Clear inputs
+            document.getElementById('songTitle').value = '';
+            document.getElementById('songArtist').value = '';
+            document.getElementById('songAlbum').value = '';
+        }
+
+        function removeSong(id) {
+            songs = songs.filter(song => song.id !== id);
+            // Also remove song from playlists
+            playlists.forEach(pl => {
+                pl.songIds = pl.songIds.filter(songId => songId !== id);
+            });
+            saveData();
+            renderSongs();
+        }
+
+        // --- PLAYLIST MANAGEMENT ---
+        function createPlaylist() {
+            const name = document.getElementById('playlistName').value.trim();
+            if (!name) return alert("Enter playlist name!");
+            
+            if (playlists.some(p => p.name === name)) {
+                return alert("Playlist with this name already exists!");
+            }
+
+            playlists.push({ name, songIds: [] });
+            saveData();
+            document.getElementById('playlistName').value = '';
+            updatePlaylistDropdowns();
+            renderPlaylists();
+        }
+
+        function updatePlaylistDropdowns() {
+            const plSelect = document.getElementById('selectPlaylist');
+            const songSelect = document.getElementById('selectSong');
+
+            plSelect.innerHTML = playlists.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+            songSelect.innerHTML = songs.map(s => `<option value="${s.id}">${s.title} - ${s.artist}</option>`).join('');
+            renderPlaylists();
+        }
+
+        function addSongToPlaylist() {
+            const plName = document.getElementById('selectPlaylist').value;
+            const songId = Number(document.getElementById('selectSong').value);
+
+            const playlist = playlists.find(p => p.name === plName);
+            if (playlist && !playlist.songIds.includes(songId)) {
+                playlist.songIds.push(songId);
+                saveData();
+                renderPlaylists();
+            } else {
+                alert("Song is already in this playlist!");
+            }
+        }
+
+        function renderPlaylists() {
+            const container = document.getElementById('playlistsDisplay');
+            container.innerHTML = '';
+
+            playlists.forEach(p => {
+                const div = document.createElement('div');
+                div.style.marginBottom = "20px";
+                
+                const playlistSongs = p.songIds.map(id => songs.find(s => s.id === id)).filter(Boolean);
+                
+                let songListHTML = playlistSongs.length > 0 
+                    ? playlistSongs.map(s => `<li>${s.title} by ${s.artist}</li>`).join('')
+                    : '<li>No songs added yet.</li>';
+
+                div.innerHTML = `
+                    <h3 style="color: #1db954; margin-bottom: 8px;">📂 ${p.name}</h3>
+                    <ul style="margin-left: 20px; color: #b3b3b3;">${songListHTML}</ul>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- ARTISTS & ALBUMS MANAGEMENT ---
+        function renderArtistsAndAlbums() {
+            const artistsList = document.getElementById('artistsList');
+            const albumsList = document.getElementById('albumsList');
+
+            artistsList.innerHTML = '';
+            albumsList.innerHTML = '';
+
+            // Unique Artists
+            const artists = [...new Set(songs.map(s => s.artist))];
+            artists.forEach(artist => {
+                const count = songs.filter(s => s.artist === artist).length;
+                artistsList.innerHTML += `
+                    <div class="card">
+                        <h3>🎤 ${artist}</h3>
+                        <p>${count} Song(s)</p>
+                    </div>
+                `;
+            });
+
+            // Unique Albums
+            const albums = [...new Set(songs.map(s => s.album))];
+            albums.forEach(album => {
+                const count = songs.filter(s => s.album === album).length;
+                albumsList.innerHTML += `
+                    <div class="card">
+                        <h3>💿 ${album}</h3>
+                        <p>${count} Song(s)</p>
+                    </div>
+                `;
+            });
+        }
+
+        // Initial render on page load
+        renderSongs();
+    </script>
+</body>
+</html>
+
+
